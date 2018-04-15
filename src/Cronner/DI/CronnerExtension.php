@@ -111,6 +111,8 @@ class CronnerExtension extends CompilerExtension
 					$this->prefix('@timestampStorage'),
 				]);
 		}
+
+		$this->loadConsoleCommands();
 	}
 
 	public function beforeCompile()
@@ -172,6 +174,27 @@ class CronnerExtension extends CompilerExtension
 		return $definition
 			->setAutowired(FALSE)
 			->setInject(FALSE);
+	}
+
+	private function loadConsoleCommands()
+	{
+		$builder = $this->getContainerBuilder();
+
+		if(!class_exists('\Kdyby\Console\DI\ConsoleExtension')) {
+			return;
+		}
+
+		$commands = [
+			\stekycz\Cronner\Console\CronnerRunTaskCommand::class,
+			\stekycz\Cronner\Console\CronnerListCommand::class,
+			\stekycz\Cronner\Console\CronnerCommand::class,
+		];
+
+		foreach ($commands as $i => $class) {
+			$builder->addDefinition($this->prefix('console.' . $i))
+				->setClass($class)
+				->addTag(\Kdyby\Console\DI\ConsoleExtension::COMMAND_TAG);
+		}
 	}
 
 }
